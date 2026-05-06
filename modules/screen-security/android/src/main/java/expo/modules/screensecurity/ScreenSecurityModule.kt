@@ -1,50 +1,134 @@
 package expo.modules.screensecurity
 
+import android.app.Activity
+import android.os.Build
+import android.provider.Settings
+import android.util.Log
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
+import expo.modules.kotlin.Promise
 
 class ScreenSecurityModule : Module() {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
+
+  private var screenCaptureCallback: Any? = null
+
   override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ScreenSecurity')` in JavaScript.
     Name("ScreenSecurity")
 
-    // Defines constant property on the module.
-    Constant("PI") {
-      Math.PI
+    Function("getDeviceId") {
+      val context = appContext.reactContext ?: return@Function ""
+      Settings.Secure.getString(
+        context.contentResolver,
+        Settings.Secure.ANDROID_ID
+      )
     }
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
-
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
-    }
-
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(ScreenSecurityView::class) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { view: ScreenSecurityView, url: URL ->
-        view.webView.loadUrl(url.toString())
+    AsyncFunction("isBiometricAuthenticated") { promise: Promise ->
+      Log.d("ScreenSecurity", "isBiometricAuthenticated called")
+      val activity = appContext.currentActivity
+      if (activity == null) {
+        promise.resolve(false)
+        return@AsyncFunction
       }
-      // Defines an event that the view can send to JavaScript.
-      Events("onLoad")
+      val biometricManager = BiometricManager.from(activity)
+      val canAuthenticate = biometricManager.canAuthenticate(
+        BiometricManager.Authenticators.BIOMETRIC_STRONG or
+        BiometricManager.Authenticators.DEVICE_CREDENTIAL
+      )
+      when (canAuthenticate) {
+        BiometricManager.BIOMETRIC_SUCCESS -> {
+          Log.d("ScreenSecurity", "Biometrics available")
+        }
+        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
+          promise.reject(
+            "BIOMETRIC_NOT_ENROLLED",
+            "Please set up biometrics in your device Settings.",
+            null
+          )
+          return@AsyncFunction
+        }
+        else -> {
+          promise.resolve(false)
+          return@AsyncFunction
+        }
+      }
+      if (activity !is androidx.fragment.app.FragmentActivity) {
+        promise.resolve(false)
+        return@AsyncFunction
+      }
+      val fragmentActivity = activity as androidx.fragment.app.FragmentActivity
+      val executor = ContextCompat.getMainExecutor(fragmentActivity)
+      val callback = object : BiometricPrompt.AuthenticationCallback() {
+        override fun onAuthenticationSucceeded(
+          result: BiometricPrompt.AuthenticationResult
+        ) {
+          Log.d("ScreenSecurity", "Authentication succeeded")
+          promise.resolve(true)
+        }
+        override fun onAuthenticationFailed() {
+          promise.resolve(false)
+        }
+        override fun onAuthenticationError(
+          errorCode: Int,
+          errString: CharSequence
+        ) {
+          Log.e("ScreenSecurity", "Authentication error: $errorCode - $errString")
+          promise.resolve(false)
+        }
+      }
+      val promptInfo = BiometricPrompt.PromptInfo.Builder()
+        .setTitle("Confirm Payout")
+        .setSubtitle("Authenticate to proceed with payout over £1,000")
+        .setAllowedAuthenticators(
+          BiometricManager.Authenticators.BIOMETRIC_STRONG or
+          BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        )
+        .build()
+      fragmentActivity.runOnUiThread {
+        Log.d("ScreenSecurity", "Showing biometric prompt on UI thread")
+        BiometricPrompt(fragmentActivity, executor, callback)
+          .authenticate(promptInfo)
+      }
+    }
+
+    Events("onScreenshotTaken")
+
+    Function("startScreenshotDetection") {
+      Log.d("ScreenSecurity", "startScreenshotDetection called")
+      val activity = appContext.currentActivity ?: return@Function null
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        val callback = Activity.ScreenCaptureCallback {
+          Log.d("ScreenSecurity", "Screenshot taken!")
+          sendEvent("onScreenshotTaken", mapOf(
+            "timestamp" to System.currentTimeMillis()
+          ))
+        }
+        activity.registerScreenCaptureCallback(
+          activity.mainExecutor,
+          callback
+        )
+        screenCaptureCallback = callback
+        Log.d("ScreenSecurity", "Screenshot detection registered")
+      }
+      return@Function null
+    }
+
+    Function("stopScreenshotDetection") {
+      Log.d("ScreenSecurity", "stopScreenshotDetection called")
+      val activity = appContext.currentActivity ?: return@Function null
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        screenCaptureCallback?.let {
+          activity.unregisterScreenCaptureCallback(
+            it as Activity.ScreenCaptureCallback
+          )
+          screenCaptureCallback = null
+          Log.d("ScreenSecurity", "Screenshot detection unregistered")
+        }
+      }
+      return@Function null
     }
   }
 }
