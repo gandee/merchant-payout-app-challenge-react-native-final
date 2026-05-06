@@ -1,4 +1,3 @@
-
 import ScreenSecurity from '@/modules/ScreenSecurity';
 import { useState, useEffect } from 'react';
 import {
@@ -43,8 +42,9 @@ export default function PayoutsScreen() {
     ScreenSecurity.startScreenshotDetection();
     const subscription = ScreenSecurity.addScreenshotListener(() => {
       Alert.alert(
-        'Security Warning',
-        'Screenshot detected. Please keep your financial data private.',
+        'Security Reminder',
+        'Please keep your financial data private. Screenshots may contain sensitive information'
+        ,
         [{ text: 'OK' }]
       );
     });
