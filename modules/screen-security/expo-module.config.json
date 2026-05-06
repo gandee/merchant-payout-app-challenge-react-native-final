@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["ScreenSecurityModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.screensecurity.ScreenSecurityModule"]
+  }
+}
