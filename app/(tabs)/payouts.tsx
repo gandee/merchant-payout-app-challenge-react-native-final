@@ -5,6 +5,7 @@ import {
   ScrollView, KeyboardAvoidingView, Platform,
   Modal, View, SafeAreaView, ActivityIndicator,
   Alert, Text,
+  Linking,
 } from 'react-native';
 import { API_BASE_URL } from '@/constants';
 import type { Currency, PayoutResponse } from '@/types/api';
@@ -70,14 +71,46 @@ export default function PayoutsScreen() {
             return;
           }
         } catch (biometricError: any) {
-          if (biometricError.code === 'BIOMETRIC_NOT_ENROLLED') {
-            setErrorMessage('Please set up biometrics in your device Settings to make payouts over £1,000.');
-          } else {
-            setErrorMessage('Biometric authentication failed. Payout cancelled.');
+          console.log('Biometric error:', JSON.stringify(biometricError));
+  console.log('Error code:', biometricError.code);
+  console.log('Error message:', biometricError.message);
+  if (biometricError.code === 'BIOMETRIC_NOT_ENROLLED') {
+    
+    Alert.alert(
+      'Biometrics Required',
+      'You need to set up fingerprint or face recognition to authorise payouts over £1,000. Would you like to go to Settings now?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: () => {
+            setLoading(false);
           }
-          setScreen('error');
-          return;
+        },
+        {
+          text: 'Open Settings',
+          onPress: () => {
+            onPress: () => {
+  Linking.sendIntent('android.settings.SECURITY_SETTINGS');
+}
+            setLoading(false);
+          }
         }
+      ]
+    );
+    return;
+  } else if (biometricError.code === 'BIOMETRIC_NOT_AVAILABLE') {
+    setErrorMessage(
+      'Biometric authentication is not available on this device.'
+    );
+    setScreen('error');
+    return;
+  } else {
+    setErrorMessage('Biometric authentication failed. Payout cancelled.');
+    setScreen('error');
+    return;
+  }
+}
       }
 
       const response = await fetch(`${API_BASE_URL}/api/payouts`, {

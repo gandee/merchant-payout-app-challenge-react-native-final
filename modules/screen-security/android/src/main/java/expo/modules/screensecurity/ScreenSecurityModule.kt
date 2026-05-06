@@ -35,26 +35,42 @@ class ScreenSecurityModule : Module() {
       }
       val biometricManager = BiometricManager.from(activity)
       val canAuthenticate = biometricManager.canAuthenticate(
-        BiometricManager.Authenticators.BIOMETRIC_STRONG or
-        BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        BiometricManager.Authenticators.BIOMETRIC_STRONG 
+        //or
+        //BiometricManager.Authenticators.DEVICE_CREDENTIAL
       )
-      when (canAuthenticate) {
-        BiometricManager.BIOMETRIC_SUCCESS -> {
-          Log.d("ScreenSecurity", "Biometrics available")
-        }
-        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-          promise.reject(
-            "BIOMETRIC_NOT_ENROLLED",
-            "Please set up biometrics in your device Settings.",
-            null
-          )
-          return@AsyncFunction
-        }
-        else -> {
-          promise.resolve(false)
-          return@AsyncFunction
-        }
-      }
+when (canAuthenticate) {
+  BiometricManager.BIOMETRIC_SUCCESS -> {
+    Log.d("ScreenSecurity", "Biometrics available — showing prompt")
+  }
+  BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
+    Log.e("ScreenSecurity", "No biometrics enrolled — rejecting promise")
+    promise.reject(
+      "BIOMETRIC_NOT_ENROLLED",
+      "Please set up biometrics in your device Settings.",
+      null
+    )
+    return@AsyncFunction
+  }
+  BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> {
+    Log.e("ScreenSecurity", "No biometric hardware")
+    promise.reject(
+      "BIOMETRIC_NOT_AVAILABLE",
+      "No biometric hardware available",
+      null
+    )
+    return@AsyncFunction
+  }
+  else -> {
+    Log.e("ScreenSecurity", "Biometrics not available: $canAuthenticate")
+    promise.reject(
+      "BIOMETRIC_NOT_AVAILABLE",
+      "Biometric authentication not available",
+      null
+    )
+    return@AsyncFunction
+  }
+}
       if (activity !is androidx.fragment.app.FragmentActivity) {
         promise.resolve(false)
         return@AsyncFunction
@@ -83,9 +99,11 @@ class ScreenSecurityModule : Module() {
         .setTitle("Confirm Payout")
         .setSubtitle("Authenticate to proceed with payout over £1,000")
         .setAllowedAuthenticators(
-          BiometricManager.Authenticators.BIOMETRIC_STRONG or
-          BiometricManager.Authenticators.DEVICE_CREDENTIAL
+          BiometricManager.Authenticators.BIOMETRIC_STRONG 
+          //or
+          //BiometricManager.Authenticators.DEVICE_CREDENTIAL
         )
+        .setNegativeButtonText("Cancel") 
         .build()
       fragmentActivity.runOnUiThread {
         Log.d("ScreenSecurity", "Showing biometric prompt on UI thread")
