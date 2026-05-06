@@ -37,48 +37,14 @@ export default function PayoutsScreen() {
   const parsedAmount = parseFloat(amount);
   const isFormValid = amount !== '' && parsedAmount > 0 && iban.trim().length > 0;
 
-  // Step 6 — screenshot detection
-  useEffect(() => {
-    ScreenSecurity.startScreenshotDetection();
-    const subscription = ScreenSecurity.addScreenshotListener(() => {
-      Alert.alert(
-        'Security Warning',
-        'Screenshot detected. Please keep your financial data private.',
-        [{ text: 'OK' }]
-      );
-    });
-    return () => {
-      ScreenSecurity.stopScreenshotDetection();
-      subscription.remove();
-    };
-  }, []);
+ 
 
   async function submitPayout() {
     try {
       setLoading(true);
       const amountInPence = Math.round(parsedAmount * 100);
 
-      // Step 5 — biometric for payouts over £1000
-      const BIOMETRIC_THRESHOLD = 100000;
-      if (amountInPence > BIOMETRIC_THRESHOLD) {
-        try {
-          const authenticated = await ScreenSecurity.isBiometricAuthenticated();
-          if (!authenticated) {
-            setErrorMessage('Biometric authentication failed. Payout cancelled.');
-            setScreen('error');
-            return;
-          }
-        } catch (biometricError: any) {
-          if (biometricError.code === 'BIOMETRIC_NOT_ENROLLED') {
-            setErrorMessage('Please set up biometrics in your device Settings to make payouts over £1,000.');
-          } else {
-            setErrorMessage('Biometric authentication failed. Payout cancelled.');
-          }
-          setScreen('error');
-          return;
-        }
-      }
-
+     
       const response = await fetch(`${API_BASE_URL}/api/payouts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -86,7 +52,6 @@ export default function PayoutsScreen() {
           amount: amountInPence,
           currency,
           iban: iban.trim(),
-          device_id: ScreenSecurity.getDeviceId(),
         }),
       });
 
