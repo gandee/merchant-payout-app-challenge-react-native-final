@@ -135,15 +135,25 @@ const renderActivity = ({ item }: { item: ActivityItem }) => (
       </ThemedView>
 
       {/* Balance Section */}
-      <ThemedView style={styles.balanceCard}>
-        <ThemedText type="subtitle">Account Balance</ThemedText>
-        <ThemedText style={styles.balanceAmount}>
-          {formatAmount(data!.available_balance, data!.currency)}
-        </ThemedText>
-        <ThemedText style={styles.pendingLabel}>
-          Pending: {formatAmount(data!.pending_balance, data!.currency)}
-        </ThemedText>
-      </ThemedView>
+ {/* Balance Section */}
+<ThemedView style={styles.balanceCard}>
+  <ThemedText type="subtitle">Account Balance</ThemedText>
+  <View style={styles.balanceRow}>
+    <View style={styles.balanceItem}>
+      <ThemedText style={styles.balanceLabel}>Available</ThemedText>
+      <ThemedText style={styles.balanceAmount}>
+        {formatAmount(data!.available_balance, data!.currency)}
+      </ThemedText>
+    </View>
+    {/* <View style={styles.balanceDivider} /> */}
+    <View style={styles.balanceItem}>
+      <ThemedText style={styles.balanceLabel}>Pending</ThemedText>
+      <ThemedText style={styles.balanceAmount}>
+        {formatAmount(data!.pending_balance, data!.currency)}
+      </ThemedText>
+    </View>
+  </View>
+</ThemedView>
 
       {/* Recent Activity */}
       <ThemedView style={styles.section}>
@@ -210,9 +220,9 @@ const styles = StyleSheet.create({
   header: { marginBottom: 24 },
   balanceCard: {
     padding: 16, borderRadius: 12, marginBottom: 24,
-    borderWidth: 1, borderColor: '#e0e0e0',
+   // borderWidth: 1, borderColor: '#e0e0e0',
   },
-  balanceAmount: { fontSize: 32, fontWeight: 'bold', marginTop: 8, marginBottom: 4 },
+balanceAmount: { fontSize: 24, fontWeight: 'bold', marginTop: 4, marginBottom: 2 },
   pendingLabel: { fontSize: 14, opacity: 0.6 },
   section: { marginBottom: 24 },
   activityRow: {
@@ -241,4 +251,9 @@ const styles = StyleSheet.create({
   activityDate: { fontSize: 12, opacity: 0.5, marginTop: 2 },
   activityStatus: { fontSize: 12, opacity: 0.5, marginTop: 2 },
   loader: { padding: 20 },
+
+  balanceRow: { flexDirection: 'row', marginTop: 12 },
+balanceItem: { flex: 1 },
+//balanceDivider: { width: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 },
+balanceLabel: { fontSize: 13, opacity: 0.5, marginBottom: 4 },
 });

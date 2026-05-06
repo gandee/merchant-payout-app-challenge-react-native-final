@@ -6,7 +6,7 @@ import type { Currency, PayoutResponse } from '@/types/api';
 
 export type ScreenState = 'form' | 'confirm' | 'success' | 'error';
 
-const BIOMETRIC_THRESHOLD = 100000; // £1,000.00 in pence
+const BIOMETRIC_THRESHOLD = 100000; // in pence, equivalent to £1,000
 
 export function usePayoutSubmit() {
   const [screen, setScreen] = useState<ScreenState>('form');

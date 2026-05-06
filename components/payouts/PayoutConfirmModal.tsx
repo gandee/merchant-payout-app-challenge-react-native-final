@@ -60,6 +60,7 @@ export function PayoutConfirmModal({
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
+            testID="modal-confirm-button"
               style={[styles.confirmButton, loading && styles.disabled]}
               onPress={onConfirm}
               disabled={loading}

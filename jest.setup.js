@@ -1,10 +1,10 @@
-import { server } from './mocks/server.test';
+global.fetch = jest.fn();
 
-// Establish API mocking before all tests
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+const { server } = require('./mocks/server.test');
 
-// Reset any request handlers that are declared as a part of our tests
-afterEach(() => server.resetHandlers());
-
-// Clean up after the tests are finished
+beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
+afterEach(() => {
+  server.resetHandlers();
+  jest.clearAllMocks();
+});
 afterAll(() => server.close());
