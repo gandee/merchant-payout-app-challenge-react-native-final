@@ -1,16 +1,16 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 60 },
+  container: { flex: 1, padding: 16, paddingTop: 80 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: { marginBottom: 24 },
   balanceCard: {
-    padding: 16, borderRadius: 12, marginBottom: 24,
+    padding: 16, borderRadius: 12, marginBottom: 34,
    // borderWidth: 1, borderColor: '#e0e0e0',
   },
   balanceAmount: { fontSize: 32, fontWeight: 'bold', marginTop: 8, marginBottom: 4 },
   pendingLabel: { fontSize: 14, opacity: 0.6 },
-  section: { marginBottom: 24 },
+  section: { marginBottom: 24, marginTop: 16,},
   activityRow: {
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', paddingVertical: 12,
@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
     fontSize: 16,
   },
   retryButton: { marginTop: 12 },
-  modalContainer: { flex: 1, backgroundColor: '#000' },
+  modalContainer: { flex: 1, backgroundColor: '#fff' },
   modalHeader: {
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', padding: 16,
@@ -53,4 +53,6 @@ export const styles = StyleSheet.create({
    balanceItem: { flex: 1 },
    //balanceDivider: { width: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 },
    balanceLabel: { fontSize: 13, opacity: 0.5, marginBottom: 4 },
+     footerLoader: { alignItems: 'center', padding: 16 },
+   loadingMoreText: { color: '#999', marginTop: 8, fontSize: 13 },
 });

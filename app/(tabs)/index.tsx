@@ -154,11 +154,14 @@ const renderActivity = ({ item }: { item: ActivityItem }) => (
       </ThemedText>
     </View>
   </View>
-  
+ 
 </ThemedView>
 
       {/* Recent Activity */}
-      <ThemedView style={styles.section}>
+              styles.activityAmount,
+              styles.activityAmount,
+              <View style={{ marginTop: 24 }}>
+      <ThemedView style={[styles.section, { marginTop: 24 }]}>
         <ThemedText type="subtitle">Recent Activity</ThemedText>
         {recentActivity.map((item: ActivityItem) => (
           <View key={item.id} style={styles.activityRow}>
@@ -177,7 +180,7 @@ const renderActivity = ({ item }: { item: ActivityItem }) => (
           <ThemedText type="link">Show more</ThemedText>
         </TouchableOpacity>
       </ThemedView>
-
+</View>
       {/* Transaction Modal */}
       <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet">
         <SafeAreaView style={styles.modalContainer}>
@@ -203,11 +206,14 @@ const renderActivity = ({ item }: { item: ActivityItem }) => (
               onEndReached={loadMore}
               onEndReachedThreshold={0.3}
               ListFooterComponent={
-                loadingMore ? <ActivityIndicator style={styles.loader} /> : null
+                loadingMore ? (
+                  <View style={styles.footerLoader}>
+                    <ActivityIndicator />
+                    <ThemedText style={styles.loadingMoreText}>Loading more...</ThemedText>
+                  </View>
+                ) : null
               }
-              ListEmptyComponent={
-                !loadingMore ? <ActivityIndicator style={styles.loader} /> : null
-              }
+              ListEmptyComponent={!loadingMore ? <ActivityIndicator style={styles.loader} /> : null}
             />
           )}
         </SafeAreaView>
