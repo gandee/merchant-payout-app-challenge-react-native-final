@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import type { MerchantDataResponse, ActivityItem, PaginatedActivityResponse } from '@/types/api';
 import { API_BASE_URL } from '@/constants';
+import { styles } from '../styles/homeStyles';
 
 function formatAmount(amount: number, currency: string): string {
   const value = Math.abs(amount) / 100;
@@ -134,10 +135,10 @@ const renderActivity = ({ item }: { item: ActivityItem }) => (
         <ThemedText type="title">Business Account</ThemedText>
       </ThemedView>
 
-      {/* Balance Section */}
  {/* Balance Section */}
 <ThemedView style={styles.balanceCard}>
   <ThemedText type="subtitle">Account Balance</ThemedText>
+  
   <View style={styles.balanceRow}>
     <View style={styles.balanceItem}>
       <ThemedText style={styles.balanceLabel}>Available</ThemedText>
@@ -153,6 +154,7 @@ const renderActivity = ({ item }: { item: ActivityItem }) => (
       </ThemedText>
     </View>
   </View>
+  
 </ThemedView>
 
       {/* Recent Activity */}
@@ -213,47 +215,3 @@ const renderActivity = ({ item }: { item: ActivityItem }) => (
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 60 },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: { marginBottom: 24 },
-  balanceCard: {
-    padding: 16, borderRadius: 12, marginBottom: 24,
-   // borderWidth: 1, borderColor: '#e0e0e0',
-  },
-balanceAmount: { fontSize: 24, fontWeight: 'bold', marginTop: 4, marginBottom: 2 },
-  pendingLabel: { fontSize: 14, opacity: 0.6 },
-  section: { marginBottom: 24 },
-  activityRow: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: '#e0e0e0',
-  },
-  activityDescription: { flex: 1, marginRight: 8 },
-  activityAmount: { fontWeight: '600' },
-  showMoreButton: { marginTop: 12, alignItems: 'center' },
-  retryButton: { marginTop: 12 },
-  modalContainer: { flex: 1, backgroundColor: '#fff' },
-  modalHeader: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', padding: 16, paddingTop: 50,
-    borderBottomWidth: 1, borderBottomColor: '#e0e0e0',
-  },
-  activityRowFull: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', padding: 16,
-    borderBottomWidth: 1, borderBottomColor: '#222',
-  },
-  activityLeft: { flex: 1, marginRight: 8 },
-  activityRight: { flex: 1, alignItems: 'flex-end' },
- activityType: { fontSize: 13, fontWeight: '600', marginBottom: 2, color: '#000000' },
-  activityDate: { fontSize: 12, opacity: 0.5, marginTop: 2 },
-  activityStatus: { fontSize: 12, opacity: 0.5, marginTop: 2 },
-  loader: { padding: 20 },
-
-  balanceRow: { flexDirection: 'row', marginTop: 12 },
-balanceItem: { flex: 1 },
-//balanceDivider: { width: 1, backgroundColor: '#e0e0e0', marginHorizontal: 16 },
-balanceLabel: { fontSize: 13, opacity: 0.5, marginBottom: 4 },
-});
